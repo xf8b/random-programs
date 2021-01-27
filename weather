@@ -20,10 +20,18 @@ function blank() {
   fi
 }   
 
-# the actual 
+function not_blank() {
+  if [ -n "$1" ] && [ "$1" != " " ]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
+# the actual code
 
 # if the first input is not blank, get the special page for it
-if [ ! "$(blank "$1")" ]; then
+if [ "$(not_blank "$1")" ]; then
   curl "wttr.in/:$1"
   exit 0
 fi
