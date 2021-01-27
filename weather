@@ -18,23 +18,9 @@ function blank() {
   else
     echo true
   fi
-}   
-
-function not_blank() {
-  if [ -n "$1" ] && [ "$1" != " " ]; then
-    echo true
-  else
-    echo false
-  fi
 }
 
 # the actual code
-
-# if the first input is not blank, get the special page for it
-if [ "$(not_blank "$1")" ]; then
-  curl "wttr.in/:$1"
-  exit 0
-fi
 
 # read user input
 read -rp "Which version of wttr.in should be used? (press enter for v1) " version
