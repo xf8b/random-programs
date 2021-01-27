@@ -10,7 +10,7 @@ Random programs I create and use.
   </a>
   <br />
   To the extent possible under law,
-  <a rel="dct:publisher"href="https://github.com/xf8b/random-programs">
+  <a rel="dct:publisher"href="https://github.com/xf8b/">
     <span property="dct:title">xf8b</span>
   </a>
   has waived all copyright and related or neighboring rights to
