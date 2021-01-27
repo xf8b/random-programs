@@ -18,7 +18,12 @@ function empty() {
   fi
 }   
 
-# the actual code
+# the actual 
+
+if [ "$1" = "help" ]; then
+  curl "wttr.in/:help"
+  exit 0
+fi
 
 read -p "Which version of wttr.in should be used? (press enter for v1) " version
 read -p "Which place's weather should be shown? (press enter for current location) " place
