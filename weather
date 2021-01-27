@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# util functions
+
+function empty() {
+  if [ ! -z "$1" -a "$1" != " " ]; then
+    echo false
+  else
+    echo true
+  fi
+}   
+
+# the actual code
+
+read -p "Which version of wttr.in should be used? (press enter for v1) " version
+read -p "Which place's weather should be shown? (press enter for current location) " place
+read -p "What arguments should be added? (press enter for none) " arguments
+
+url="v$version.wttr.in"
+
+if [ $(empty "$place") ]; then
+  url+="/$place"
+fi
+
+if [ $(empty "$arguments") ]; then
+  url+="?$arguments"
+fi
+
+echo
+
+curl "$url"
