@@ -10,11 +10,10 @@ Random programs I create and use.
   </a>
   <br />
   To the extent possible under law,
-  <a rel="dct:publisher"href="https://github.com/xf8b/">
+  <a rel="dct:publisher" href="https://github.com/xf8b/">
     <span property="dct:title">xf8b</span>
   </a>
-  has waived all copyright and related or neighboring rights to
-  <span property="dct:title">random-programs</span>.
-This work is published from:
-<span property="vcard:Country" datatype="dct:ISO3166" content="US" about="https://github.com/xf8b/random-programs">United States</span>.
+  has waived all copyright and related or neighboring rights to <span property="dct:title">random-programs</span>.
+  This work is published from:
+  <span property="vcard:Country" datatype="dct:ISO3166" content="US" about="https://github.com/xf8b/random-programs/">United States</span>.
 </p>
