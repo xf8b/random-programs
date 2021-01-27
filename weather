@@ -10,7 +10,9 @@
 
 # util functions
 
-function empty() {
+function blank() {
+  # if the first input is not empty and is not a space, return false
+  # else return true
   if [ -n "$1" ] && [ "$1" != " " ]; then
     echo false
   else
@@ -20,25 +22,32 @@ function empty() {
 
 # the actual 
 
-if [ "$1" = "help" ]; then
-  curl "wttr.in/:help"
+# if the first input is not blank, get the special page for it
+if [ "$(blank "$1")" ]; then
+  curl "wttr.in/:$1"
   exit 0
 fi
 
+# read user input
 read -rp "Which version of wttr.in should be used? (press enter for v1) " version
 read -rp "Which place's weather should be shown? (press enter for current location) " place
 read -rp "What arguments should be added? (press enter for none) " arguments
 
+# base url
 url="v$version.wttr.in"
 
-if [ "$(empty "$place")" ]; then
+# if a place is specified, use that place
+if [ "$(blank "$place")" ]; then
   url+="/$place"
 fi
 
-if [ "$(empty "$arguments")" ]; then
+# if arguments are specified, use those arguments
+if [ "$(blank "$arguments")" ]; then
   url+="?$arguments"
 fi
 
+# create empty line between input questions and the result
 echo
 
+# get the result
 curl "$url"
