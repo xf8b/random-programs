@@ -23,7 +23,7 @@ function blank() {
 # the actual 
 
 # if the first input is not blank, get the special page for it
-if [ "$(blank "$1")" ]; then
+if [ ! "$(blank "$1")" ]; then
   curl "wttr.in/:$1"
   exit 0
 fi
