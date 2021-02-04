@@ -12,13 +12,13 @@
 
 # util functions
 
-function blank() {
+function not_blank() {
   # if the first input is not empty and is not a space, return false
   # else return true
-  if [ -n "$1" ] && [ "$1" != " " ]; then
-    echo false
-  else
+  if [[ -n "$1" ]] && [[ "$1" != " " ]]; then
     echo true
+  else
+    echo false
   fi
 }
 
@@ -33,17 +33,17 @@ read -rp "What arguments should be added? (press enter for none) " arguments
 url="v$version.wttr.in"
 
 # if a place is specified, use that place
-if [ "$(blank "$place")" ]; then
+if [[ $(not_blank "$place") ]]; then
   url+="/$place"
 fi
 
 # if arguments are specified, use those arguments
-if [ "$(blank "$arguments")" ]; then
+if [[ $(not_blank "$arguments") ]]; then
   url+="?$arguments"
 fi
 
 # create empty line between input questions and the result
-echo
+echo ""
 
 # get the result
 curl "$url"
