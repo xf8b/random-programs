@@ -50,12 +50,19 @@ usage:
   weather [options]
 
 options:
-  -h        show this help message
-  -u url    set a custom url to get the weather from
+  -h              show this help message
+  -u url          set a custom url to get the weather from
+  -v version      set the version of wttr.in to use
+  -l location     set the location of the place to get the weather for
+  -a arguments    set the arguments to be passed into wttr.in
 "
 
+version="1"
+location=""
+arguments=""
+
 # get options
-while getopts ':hu:' option; do
+while getopts ':hu:v:l:a:' option; do
   case "$option" in
   # help message
   h)
@@ -72,6 +79,17 @@ while getopts ':hu:' option; do
       exit 0
     fi
     ;;
+  v)
+    # check if version is valid
+    if eval "$(not_blank "$OPTARG")" && eval "$(invalid_version "$OPTARG")"; then
+      echo_error "error: version '$OPTARG' is not a valid version" >&2
+      exit 1
+    else
+      version=$OPTARG
+    fi
+    ;;
+  l) location=$OPTARG ;;
+  a) arguments=$OPTARG ;;
   :)
     tput setaf 1
     printf "error: missing argument for -%s\n" "$OPTARG" >&2
@@ -91,38 +109,18 @@ done
 
 shift $((OPTIND - 1))
 
-# read user input
-tput setaf 2
-tput bold
-
-read -rp "Which version of wttr.in should be used? (press enter for v1) " version
-read -rp "Which place's weather should be shown? (press enter for current location) " place
-read -rp "What arguments should be added? (press enter for none) " arguments
-
-tput sgr0
-
-# check if version is valid
-# shellcheck disable=SC2046
-if eval "$(not_blank "$version")" && eval "$(invalid_version "$version")"; then
-  echo_error "error: version '$version' is not a valid version" >&2
-  exit 1
-fi
-
 # base url
 url="v$version.wttr.in"
 
-# if a place is specified, use that place
-if eval "$(not_blank "$place")"; then
-  url+="/$place"
+# if a location is specified, use that location
+if eval "$(not_blank "$location")"; then
+  url+="/$location"
 fi
 
 # if arguments are specified, use those arguments
 if eval "$(not_blank "$arguments")"; then
   url+="?$arguments"
 fi
-
-# create empty line between input questions and the result
-echo ""
 
 # get the result
 curl "$url"
