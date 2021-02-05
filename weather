@@ -1,14 +1,14 @@
 #!/bin/bash
 
-######################################################################################################
-# random-programs weather - a simple bash script for getting the weather                             #
-# Written in 2021 by xf8b <unknownperson102424@pm.me>                                                #
-# To the extent possible under law, the author has dedicated all copyright                           #
-# and related and neighboring rights to this software to the public domain worldwide.                #
-# This software is distributed without any warranty.                                                 #
-# You should have also received a copy of the CC0 Public Domain Dedication along with this software. #
-# If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.                                  #
-######################################################################################################
+##########################################################################################################
+##                random-programs weather - a simple bash script for getting the weather                ##
+##                    Written in 2021 by xf8b <unknownperson102424@pm.me>                               ##
+##               To the extent possible under law, the author has dedicated all copyright               ##
+##         and related and neighboring rights to this software to the public domain worldwide.          ##
+##                          This software is distributed without any warranty.                          ##
+##  You should have also received a copy of the CC0 Public Domain Dedication along with this software.  ##
+##                   If not, see <https://creativecommons.org/publicdomain/zero/1.0/>.                  ##
+##########################################################################################################
 
 # util functions
 
@@ -16,50 +16,108 @@ function not_blank() {
   # if the first input is not empty and is not a space, return false
   # else return true
 
-  if [[ -n "$1" ]] && [[ "$1" != " " ]]; then echo true
-  else echo false; fi
+  if [[ -n "$1" ]] && [[ "$1" != " " ]]; then
+    echo true
+  else
+    echo false
+  fi
 }
 
 function invalid_version() {
   # if the number does not match the regex, return true
   # else return false
 
-  if ! [[ "$1" =~ ^[1-3]$ ]]; then echo true
-  else echo false; fi
+  if ! [[ "$1" =~ ^[1-3]$ ]]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
+function echo_error() {
+  tput setaf 1
+  echo "$@"
+  tput sgr0
 }
 
 # the actual code
 
-# check if a custom url was given
-if $(not_blank "$1"); then
-  if ! [[ "$1" =~ ^(v[1-3]\.)?wttr\.in.*$ ]]; then
-    echo "error: url '$1' is not a valid url" >&2; exit 1
-  else
-    curl "$1"
+# usage message
+USAGE="name:
+  $(basename "$0") - a simple bash script for getting the weather
+
+usage:
+  weather [options]
+
+options:
+  -h        show this help message
+  -u url    set a custom url to get the weather from
+"
+
+# get options
+while getopts ':hu:' option; do
+  case "$option" in
+  # help message
+  h)
+    echo "$USAGE"
     exit 0
-  fi
-fi
+    ;;
+  # custom url
+  u)
+    if ! [[ "$OPTARG" =~ ^(v[1-3]\.)?wttr\.in.*$ ]]; then
+      echo_error "error: url '$OPTARG' is not a valid url" >&2
+      exit 1
+    else
+      curl "$OPTARG"
+      exit 0
+    fi
+    ;;
+  :)
+    tput setaf 1
+    printf "error: missing argument for -%s\n" "$OPTARG" >&2
+    tput sgr0
+    echo "$USAGE"
+    exit 1
+    ;;
+  \?)
+    tput setaf 1
+    printf "error: illegal option: -%s\n" "$OPTARG" >&2
+    tput sgr0
+    echo "$USAGE"
+    exit 1
+    ;;
+  esac
+done
+
+shift $((OPTIND - 1))
 
 # read user input
+tput setaf 2
+tput bold
+
 read -rp "Which version of wttr.in should be used? (press enter for v1) " version
 read -rp "Which place's weather should be shown? (press enter for current location) " place
 read -rp "What arguments should be added? (press enter for none) " arguments
 
+tput sgr0
+
 # check if version is valid
-if $(not_blank "$version") && $(invalid_version "$version"); then
-  echo "error: version '$version' is not a valid version" >&2; exit 1
+# shellcheck disable=SC2046
+if eval "$(not_blank "$version")" && eval "$(invalid_version "$version")"; then
+  echo_error "error: version '$version' is not a valid version" >&2
+  exit 1
 fi
 
 # base url
 url="v$version.wttr.in"
 
 # if a place is specified, use that place
-if $(not_blank "$place"); then
+if eval "$(not_blank "$place")"; then
   url+="/$place"
 fi
 
 # if arguments are specified, use those arguments
-if $(not_blank "$arguments"); then
+if eval "$(not_blank "$arguments")"; then
   url+="?$arguments"
 fi
 
