@@ -12,39 +12,17 @@
 
 # util functions
 
-function not_blank() {
-  # if the first input is not empty and is not a space, return false
-  # else return true
-
-  if [[ -n "$1" ]] && [[ "$1" != " " ]]; then
-    echo true
-  else
-    echo false
-  fi
-}
-
-function invalid_version() {
-  # if the number does not match the regex, return true
-  # else return false
-
-  if ! [[ "$1" =~ ^[1-3]$ ]]; then
-    echo true
-  else
-    echo false
-  fi
-}
-
-function echo_error() {
-  tput setaf 1
-  echo "$@"
-  tput sgr0
+function error() {
+  # echo a red message
+  echo "$(tput setaf 1)$*$(tput sgr0)" >&2
+  exit 1
 }
 
 # the actual code
 
-# usage message
+# constants
 USAGE="name:
-  $(basename "$0") - a simple bash script for getting the weather
+  weather - a simple bash script for getting the weather
 
 usage:
   weather [options]
@@ -54,16 +32,19 @@ options:
   -u url          set a custom url to get the weather from
   -v version      set the version of wttr.in to use
   -l location     set the location of the place to get the weather for
-  -a arguments    set the arguments to be passed into wttr.in
-"
+  -a arguments    set the arguments to be passed into wttr.in"
+URL_REGEX="^(https?:\/\/)?(v[1-3]\.)?wttr\.in.*$"
+VERSION_REGEX="^[1-3]$"
 
+# vars for the curl part
+url=""
 version="1"
 location=""
 arguments=""
 
 # get options
-while getopts ':hu:v:l:a:' option; do
-  case "$option" in
+while getopts ':hu:v:l:a:' OPTION; do
+  case "$OPTION" in
   # help message
   h)
     echo "$USAGE"
@@ -71,55 +52,55 @@ while getopts ':hu:v:l:a:' option; do
     ;;
   # custom url
   u)
-    if ! [[ "$OPTARG" =~ ^(v[1-3]\.)?wttr\.in.*$ ]]; then
-      echo_error "error: url '$OPTARG' is not a valid url" >&2
-      exit 1
+    if ! [[ $OPTARG =~ $URL_REGEX ]]; then
+      error "error: url '$OPTARG' is not a valid url
+error: url must match $URL_REGEX"
     else
-      curl "$OPTARG"
-      exit 0
+      url=$OPTARG
     fi
     ;;
+  # version
   v)
     # check if version is valid
-    if eval "$(not_blank "$OPTARG")" && eval "$(invalid_version "$OPTARG")"; then
-      echo_error "error: version '$OPTARG' is not a valid version" >&2
-      exit 1
+    if ! [[ $OPTARG =~ $VERSION_REGEX ]]; then
+      error "error: version '$OPTARG' is not a valid version
+error: version must match $VERSION_REGEX"
     else
       version=$OPTARG
     fi
     ;;
+  # location
   l) location=$OPTARG ;;
+  # arguments
   a) arguments=$OPTARG ;;
+  # missing argument
   :)
-    tput setaf 1
-    printf "error: missing argument for -%s\n" "$OPTARG" >&2
-    tput sgr0
-    echo "$USAGE"
-    exit 1
+    error "error: missing argument for -$OPTARG
+error: use -h to see the help message"
     ;;
+  # unknown option
   \?)
-    tput setaf 1
-    printf "error: illegal option: -%s\n" "$OPTARG" >&2
-    tput sgr0
-    echo "$USAGE"
-    exit 1
+    error "error: unknown option: -$OPTARG
+error: use -h to see the help message"
     ;;
   esac
 done
 
 shift $((OPTIND - 1))
 
-# base url
-url="v$version.wttr.in"
+# if no custom url was set then make it using the vars provided
+if [[ -z "$url" ]]; then
+  url="https://v$version.wttr.in"
 
-# if a location is specified, use that location
-if eval "$(not_blank "$location")"; then
-  url+="/$location"
-fi
+  # if a location is specified, use that location
+  if [[ -n "$location" ]]; then
+    url+="/$location"
+  fi
 
-# if arguments are specified, use those arguments
-if eval "$(not_blank "$arguments")"; then
-  url+="?$arguments"
+  # if arguments are specified, use those arguments
+  if [[ -n "$arguments" ]]; then
+    url+="?$arguments"
+  fi
 fi
 
 # get the result
