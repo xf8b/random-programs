@@ -12,9 +12,17 @@
 
 # util functions
 
+function info() {
+  # echo a green message
+  echo "info: $(tput setaf 2)$*$(tput sgr0)" >&1
+}
+
 function error() {
   # echo a red message
-  echo "$(tput setaf 1)$*$(tput sgr0)" >&2
+  echo "error: $(tput setaf 1)$*$(tput sgr0)" >&2
+}
+
+function die() {
   exit 1
 }
 
@@ -43,7 +51,7 @@ location=""
 arguments=""
 
 # get options
-while getopts ':hu:v:l:a:' OPTION; do
+while getopts ":hu:v:l:a:" OPTION; do
   case "$OPTION" in
   # help message
   h)
@@ -53,35 +61,43 @@ while getopts ':hu:v:l:a:' OPTION; do
   # custom url
   u)
     if ! [[ $OPTARG =~ $URL_REGEX ]]; then
-      error "error: url '$OPTARG' is not a valid url
-error: url must match $URL_REGEX"
+      error "url '$OPTARG' is not a valid url, must match $URL_REGEX" && die
     else
       url=$OPTARG
+      info "url is $url"
     fi
     ;;
   # version
   v)
     # check if version is valid
     if ! [[ $OPTARG =~ $VERSION_REGEX ]]; then
-      error "error: version '$OPTARG' is not a valid version
-error: version must match $VERSION_REGEX"
+      error "version '$OPTARG' is not a valid version, must match $VERSION_REGEX" && die
     else
       version=$OPTARG
+      info "version is $version"
     fi
     ;;
   # location
-  l) location=$OPTARG ;;
+  l)
+    location=$OPTARG
+    info "location is $location"
+    ;;
   # arguments
-  a) arguments=$OPTARG ;;
+  a)
+    arguments=$OPTARG
+    info "arguments is $arguments"
+    ;;
   # missing argument
   :)
-    error "error: missing argument for -$OPTARG
-error: use -h to see the help message"
+    error "missing argument for -$OPTARG"
+    info "use -h to see the help message"
+    die
     ;;
   # unknown option
   \?)
-    error "error: unknown option: -$OPTARG
-error: use -h to see the help message"
+    error "unknown option: -$OPTARG"
+    info "use -h to see the help message"
+    die
     ;;
   esac
 done
@@ -101,7 +117,11 @@ if [[ -z "$url" ]]; then
   if [[ -n "$arguments" ]]; then
     url+="?$arguments"
   fi
+
+  info "end url is $url"
 fi
+
+echo ""
 
 # get the result
 curl "$url"
