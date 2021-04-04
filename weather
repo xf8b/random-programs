@@ -14,12 +14,17 @@
 
 function info() {
   # echo a green message
-  echo "info: $(tput setaf 2)$*$(tput sgr0)" >&1
+  echo "$(tput setaf 2)info$(tput sgr0): $*" >&1
+}
+
+function warning() {
+  # echo a yellow message
+  echo "$(tput setaf 3)warning$(tput sgr0): $*" >&2
 }
 
 function error() {
   # echo a red message
-  echo "error: $(tput setaf 1)$*$(tput sgr0)" >&2
+  echo "$(tput setaf 1)error$(tput sgr0): $*" >&2
 }
 
 function die() {
@@ -43,6 +48,8 @@ options:
   -a arguments    set the arguments to be passed into wttr.in"
 URL_REGEX="^(https?:\/\/)?(v[1-3]\.)?wttr\.in.*$"
 VERSION_REGEX="^[1-3]$"
+# defaults
+DEFAULT_VERSION="1"
 
 # vars for the curl part
 url=""
@@ -71,7 +78,9 @@ while getopts ":hu:v:l:a:" OPTION; do
   v)
     # check if version is valid
     if ! [[ $OPTARG =~ $VERSION_REGEX ]]; then
-      error "version '$OPTARG' is not a valid version, must match $VERSION_REGEX" && die
+      warning "version '$OPTARG' is not a valid version, must match $VERSION_REGEX"
+      info "using default version $DEFAULT_VERSION"
+      version=$DEFAULT_VERSION
     else
       version=$OPTARG
       info "version is $version"
