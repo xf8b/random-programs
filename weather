@@ -31,6 +31,37 @@ function die() {
   exit 1
 }
 
+# very inefficient code yes. fix it no
+function echo_flags() {
+  # t now at least
+
+  if [[ -n "$url" ]]; then
+    if [[ -n "$version" && "$version" != "1" ]]; then
+      info "version is $version (ignored)"
+    fi
+
+    if [[ -n "$location" ]]; then
+      info "location is $location (ignored)"
+    fi
+
+    if [[ -n "$arguments" ]]; then
+      info "arguments are $arguments (ignored)"
+    fi
+  else
+    if [[ -n "$version" && "$version" != "1" ]]; then
+      info "version is $version"
+    fi
+
+    if [[ -n "$location" ]]; then
+      info "location is $location"
+    fi
+
+    if [[ -n "$arguments" ]]; then
+      info "arguments are $arguments"
+    fi
+  fi
+}
+
 # constants
 USAGE="name:
   weather - a simple bash script for getting the weather
@@ -40,7 +71,7 @@ usage:
 
 options:
   -h              show this help message
-  -u url          set a custom URL to get the weather from
+  -u url          set a custom URL to get the weather from (using this ignores -v, -l, and -a)
   -v version      set the version of wttr.in to use
   -l location     set the location of the place to get the weather for
   -a arguments    set the arguments to be passed into wttr.in"
@@ -69,7 +100,6 @@ while getopts ":hu:v:l:a:" OPTION; do
       # do nothing to get default URL assembly
     else
       url=$OPTARG
-      info "url is $url"
       info "ignoring flags -v, -l, -a"
     fi
     ;;
@@ -78,22 +108,19 @@ while getopts ":hu:v:l:a:" OPTION; do
     # check if version is valid
     if ! [[ $OPTARG =~ $VERSION_REGEX ]]; then
       warning "version '$OPTARG' is not a valid version, must match $VERSION_REGEX"
-      info "using default version $DEFAULT_VERSION"
+      info "using default version $version"
       # the version is already set to the default, no need to do anything
     else
       version=$OPTARG
-      info "version is $version"
     fi
     ;;
   # location
   l)
     location=$OPTARG
-    info "location is $location"
     ;;
   # arguments
   a)
     arguments=$OPTARG
-    info "arguments is $arguments"
     ;;
   # missing argument
   :)
@@ -114,6 +141,7 @@ shift $((OPTIND - 1))
 
 # if no custom url was set then make it using the vars provided
 if [[ -z "$url" ]]; then
+  echo_flags
   url="https://v$version.wttr.in"
 
   # if a location is specified, use that location
@@ -126,7 +154,10 @@ if [[ -z "$url" ]]; then
     url+="?$arguments"
   fi
 
-  info "end url is $url"
+  info "assembled url is $url"
+else
+  info "url is $url"
+  echo_flags
 fi
 
 echo ""
