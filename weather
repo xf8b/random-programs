@@ -31,8 +31,6 @@ function die() {
   exit 1
 }
 
-# the actual code
-
 # constants
 USAGE="name:
   weather - a simple bash script for getting the weather
@@ -42,14 +40,12 @@ usage:
 
 options:
   -h              show this help message
-  -u url          set a custom url to get the weather from
+  -u url          set a custom URL to get the weather from
   -v version      set the version of wttr.in to use
   -l location     set the location of the place to get the weather for
   -a arguments    set the arguments to be passed into wttr.in"
 URL_REGEX="^(https?:\/\/)?(v[1-3]\.)?wttr\.in.*$"
 VERSION_REGEX="^[1-3]$"
-# defaults
-DEFAULT_VERSION="1"
 
 # vars for the curl part
 url=""
@@ -68,10 +64,13 @@ while getopts ":hu:v:l:a:" OPTION; do
   # custom url
   u)
     if ! [[ $OPTARG =~ $URL_REGEX ]]; then
-      error "url '$OPTARG' is not a valid url, must match $URL_REGEX" && die
+      warning "url '$OPTARG' is not a valid URL, must match $URL_REGEX"
+      info "using default URL assembly"
+      # do nothing to get default URL assembly
     else
       url=$OPTARG
       info "url is $url"
+      info "ignoring flags -v, -l, -a"
     fi
     ;;
   # version
@@ -80,7 +79,7 @@ while getopts ":hu:v:l:a:" OPTION; do
     if ! [[ $OPTARG =~ $VERSION_REGEX ]]; then
       warning "version '$OPTARG' is not a valid version, must match $VERSION_REGEX"
       info "using default version $DEFAULT_VERSION"
-      version=$DEFAULT_VERSION
+      # the version is already set to the default, no need to do anything
     else
       version=$OPTARG
       info "version is $version"
